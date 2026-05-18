@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Export Logo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body { 
+            background: #111; 
+            color: #fff; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0;
+            font-family: sans-serif; 
+        }
+        #logo-container {
+            display: flex; 
+            align-items: center;
+            background: transparent;
+            padding: 50px;
+        }
+        .logo-text {
+            font-family: 'Share Tech Mono', monospace; 
+            font-size: 150px; 
+            font-weight: 700; 
+            color: #f4f4f5; 
+            letter-spacing: -3px; 
+            line-height: 1;
+        }
+        .highlight { color: #00ff66; }
+        button { 
+            margin-top: 50px; 
+            padding: 15px 30px; 
+            font-size: 20px; 
+            cursor: pointer; 
+            background: #00ff66; 
+            color: #000; 
+            border: none; 
+            font-weight: bold; 
+            border-radius: 8px;
+        }
+        button:hover { background: #00cc55; }
+    </style>
+</head>
+<body>
+    <div id="logo-container">
+        <svg viewBox="0 0 24 24" width="180" height="180" style="margin-right: 40px; filter: drop-shadow(0 0 20px rgba(0,255,102,0.6));">
+            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" fill="none" stroke="#00ff66" stroke-width="2"/>
+            <rect x="9" y="9" width="6" height="6" fill="#00ff66"/>
+            <path fill="none" stroke="#00ff66" stroke-width="2" stroke-linecap="round" d="M9 1V4M15 1V4M9 20V23M15 20V23M20 9H23M20 15H23M1 9H4M1 15H4"/>
+        </svg>
+        <div class="logo-text">
+            <span style="color: #9d00ff; text-shadow: 0 0 20px rgba(157,0,255,0.4);">SIMPLY</span><span style="color: #00ff66; text-shadow: 0 0 20px rgba(0,255,102,0.4);">COMPUTERZ</span>
+        </div>
+    </div>
+    
+    <button onclick="downloadLogo()">Download Transparent PNG (For Cards)</button>
+
+    <script>
+        function downloadLogo() {
+            html2canvas(document.querySelector("#logo-container"), {
+                backgroundColor: null, // Transparent background!
+                scale: 3 // Ultra high resolution for printing
+            }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'Simply_Computerz_Logo_Print.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
