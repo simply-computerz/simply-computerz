@@ -26,7 +26,6 @@
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "Simply Computerz",
-      "image": "https://simplycomputerz.co.uk/assets/simply_computerz_logo_wide.png",
       "url": "https://simplycomputerz.co.uk/",
       "telephone": "+447774661861",
       "address": {
@@ -47,8 +46,15 @@
 
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="logo">
-                <img src="assets/simply_computerz_logo_wide.png" alt="Simply Computerz Logo">
+            <a href="#" class="logo-text" style="display: flex; align-items: center; text-decoration: none;">
+                <svg viewBox="0 0 24 24" width="30" height="30" style="margin-right: 10px;">
+                    <path fill="none" stroke="var(--primary)" stroke-width="2" d="M6 6h12v12H6z"/>
+                    <path fill="none" stroke="var(--primary)" stroke-width="2" d="M9 6V3m6 3V3M6 9H3m18 0h-3M6 15H3m18 0h-3M9 18v3m6-3v3"/>
+                    <circle cx="12" cy="12" r="2" fill="var(--primary)"/>
+                </svg>
+                <span style="font-family: 'Share Tech Mono', monospace; font-size: 1.6rem; font-weight: 700; color: var(--text-light); letter-spacing: -0.5px;">
+                    SIMPLY<span style="color: var(--primary);">COMPUTERZ</span>
+                </span>
             </a>
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
@@ -426,7 +432,16 @@
     <footer>
         <div class="footer-container">
             <div class="footer-brand">
-                <img src="assets/simply_computerz_logo_wide.png" alt="Simply Computerz Logo" class="footer-logo" style="width: 250px; height: auto; object-fit: contain;">
+                <a href="#" class="logo-text" style="display: inline-flex; align-items: center; text-decoration: none; margin-bottom: 20px;">
+                    <svg viewBox="0 0 24 24" width="40" height="40" style="margin-right: 12px;">
+                        <path fill="none" stroke="var(--primary)" stroke-width="2" d="M6 6h12v12H6z"/>
+                        <path fill="none" stroke="var(--primary)" stroke-width="2" d="M9 6V3m6 3V3M6 9H3m18 0h-3M6 15H3m18 0h-3M9 18v3m6-3v3"/>
+                        <circle cx="12" cy="12" r="2" fill="var(--primary)"/>
+                    </svg>
+                    <span style="font-family: 'Share Tech Mono', monospace; font-size: 2.2rem; font-weight: 700; color: var(--text-light); letter-spacing: -0.5px;">
+                        SIMPLY<span style="color: var(--primary);">COMPUTERZ</span>
+                    </span>
+                </a>
                 <p>Computer & Tech Support across Cornwall.</p>
             </div>
             <div class="footer-links">
