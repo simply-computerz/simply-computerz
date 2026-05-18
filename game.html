@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NETRUNNER.EXE | Simply Computerz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Share Tech Mono', monospace;
+            cursor: none;
+        }
+        canvas { display: block; }
+
+        #hud {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .hud-block { display: flex; flex-direction: column; gap: 6px; }
+        .hud-label { color: rgba(0,255,102,0.5); font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; }
+        .hud-value { color: #00ff66; font-size: 1.4rem; font-weight: bold; text-shadow: 0 0 10px #00ff66; }
+        .health-bar-wrap { width: 180px; }
+        .health-bar-bg { background: rgba(255,255,255,0.1); border: 1px solid rgba(0,255,102,0.3); border-radius: 4px; height: 10px; width: 100%; }
+        .health-bar { background: linear-gradient(90deg, #00ff66, #00cc44); height: 100%; border-radius: 4px; transition: width 0.2s; box-shadow: 0 0 8px #00ff66; }
+        .lives { display: flex; gap: 6px; }
+        .life-icon { color: #00ff66; font-size: 1rem; text-shadow: 0 0 8px #00ff66; }
+
+        #back-btn {
+            position: fixed;
+            top: 15px; left: 50%;
+            transform: translateX(-50%);
+            color: rgba(0,255,102,0.4);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            text-decoration: none;
+            letter-spacing: 2px;
+            pointer-events: auto;
+            z-index: 20;
+            transition: color 0.2s;
+        }
+        #back-btn:hover { color: #00ff66; }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.85);
+            z-index: 50;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        #overlay h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: #00ff66;
+            text-shadow: 0 0 40px #00ff66, 0 0 80px rgba(0,255,102,0.3);
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+        }
+        #overlay .sub {
+            color: rgba(0,255,102,0.6);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            margin-bottom: 40px;
+        }
+        #overlay .instructions {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.85rem;
+            line-height: 2;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        #overlay .instructions span { color: #00ff66; }
+        #overlay .start-prompt {
+            color: #00ff66;
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            animation: blink 1s infinite;
+        }
+        #overlay .score-display {
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        #overlay .hi-display {
+            color: rgba(0,255,102,0.6);
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+        #wave-announce {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ff66;
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 800;
+            letter-spacing: 6px;
+            text-shadow: 0 0 40px #00ff66;
+            pointer-events: none;
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #wave-announce.boss { color: #ff003c; text-shadow: 0 0 40px #ff003c; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <a href="index.html" id="back-btn">← BACK TO SITE</a>
+
+    <div id="hud" style="display:none">
+        <div class="hud-block">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="score-val">0</div>
+        </div>
+        <div class="hud-block" style="align-items:center">
+            <div class="hud-label">Health</div>
+            <div class="health-bar-wrap">
+                <div class="health-bar-bg"><div class="health-bar" id="health-bar" style="width:100%"></div></div>
+            </div>
+            <div class="lives" id="lives-display"></div>
+        </div>
+        <div class="hud-block" style="align-items:flex-end">
+            <div class="hud-label">Wave</div>
+            <div class="hud-value" id="wave-val">0</div>
+            <div class="hud-label" id="hi-val" style="color:rgba(0,255,102,0.5)">HI: 0</div>
+        </div>
+    </div>
+
+    <div id="wave-announce"></div>
+
+    <div id="overlay">
+        <h1>NETRUNNER.EXE</h1>
+        <div class="sub">A SIMPLY COMPUTERZ GAME</div>
+        <div class="instructions" id="instr">
+            <span>WASD</span> / <span>ARROW KEYS</span> to move<br>
+            <span>MOUSE</span> to aim &nbsp;|&nbsp; <span>CLICK</span> or <span>SPACE</span> to shoot<br>
+            Survive the waves. Destroy the MAINFRAME.
+        </div>
+        <div class="score-display" id="overlay-score" style="display:none"></div>
+        <div class="hi-display" id="overlay-hi" style="display:none"></div>
+        <div class="start-prompt" id="start-prompt">[ CLICK OR PRESS ANY KEY TO JACK IN ]</div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
