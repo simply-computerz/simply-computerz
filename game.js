@@ -30,6 +30,8 @@ let bullets = [], eBullets = [], enemies = [], particles = [], powerups = [];
 // --- Input ---
 const keys = {};
 let mouseX = innerWidth / 2, mouseY = innerHeight / 2, mouseDown = false, shootCooldown = 0;
+let leftJoy = { active: false, id: null, ox: 0, oy: 0, x: 0, y: 0 };
+let rightJoy = { active: false, id: null, ox: 0, oy: 0, x: 0, y: 0 };
 document.addEventListener('keydown', e => {
     keys[e.code] = true;
     if (e.code === 'Space') e.preventDefault();
@@ -39,6 +41,34 @@ document.addEventListener('keyup', e => keys[e.code] = false);
 canvas.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
 canvas.addEventListener('mousedown', () => { mouseDown = true; if (gameState !== 'PLAYING') startGame(); });
 canvas.addEventListener('mouseup', () => mouseDown = false);
+
+// Touch Listeners
+function handleTouch(e) {
+    if (e.cancelable) e.preventDefault();
+    if (gameState !== 'PLAYING') { startGame(); return; }
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (t.clientX < innerWidth / 2) {
+            if (!leftJoy.active) { leftJoy.active = true; leftJoy.id = t.identifier; leftJoy.ox = t.clientX; leftJoy.oy = t.clientY; }
+            leftJoy.x = t.clientX; leftJoy.y = t.clientY;
+        } else {
+            if (!rightJoy.active) { rightJoy.active = true; rightJoy.id = t.identifier; rightJoy.ox = t.clientX; rightJoy.oy = t.clientY; }
+            rightJoy.x = t.clientX; rightJoy.y = t.clientY;
+        }
+    }
+}
+function handleTouchEnd(e) {
+    if (e.cancelable) e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (leftJoy.id === t.identifier) { leftJoy.active = false; leftJoy.id = null; }
+        if (rightJoy.id === t.identifier) { rightJoy.active = false; rightJoy.id = null; }
+    }
+}
+canvas.addEventListener('touchstart', handleTouch, {passive: false});
+canvas.addEventListener('touchmove', handleTouch, {passive: false});
+canvas.addEventListener('touchend', handleTouchEnd, {passive: false});
+canvas.addEventListener('touchcancel', handleTouchEnd, {passive: false});
 
 // --- Player ---
 const P = {
@@ -56,12 +86,25 @@ const P = {
         if (keys['KeyS'] || keys['ArrowDown']) dy += this.speed;
         if (keys['KeyA'] || keys['ArrowLeft']) dx -= this.speed;
         if (keys['KeyD'] || keys['ArrowRight']) dx += this.speed;
-        if (dx && dy) { dx *= 0.707; dy *= 0.707; }
+        
+        if (leftJoy.active) {
+            let jx = leftJoy.x - leftJoy.ox, jy = leftJoy.y - leftJoy.oy, d = Math.hypot(jx, jy);
+            if (d > 5) { let f = Math.min(d/40, 1); dx = (jx/d)*this.speed*f; dy = (jy/d)*this.speed*f; }
+        } else if (dx && dy) { dx *= 0.707; dy *= 0.707; }
+
         this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x + dx));
         this.y = Math.max(this.size, Math.min(canvas.height - this.size, this.y + dy));
-        this.angle = Math.atan2(mouseY - this.y, mouseX - this.x);
+        
+        let isShooting = mouseDown || keys['Space'];
+        if (rightJoy.active) {
+            let jx = rightJoy.x - rightJoy.ox, jy = rightJoy.y - rightJoy.oy;
+            if (Math.hypot(jx, jy) > 5) { this.angle = Math.atan2(jy, jx); isShooting = true; }
+        } else {
+            this.angle = Math.atan2(mouseY - this.y, mouseX - this.x);
+        }
+
         shootCooldown--;
-        if ((mouseDown || keys['Space']) && shootCooldown <= 0) {
+        if (isShooting && shootCooldown <= 0) {
             bullets.push({ x: this.x + Math.cos(this.angle)*this.size, y: this.y + Math.sin(this.angle)*this.size, vx: Math.cos(this.angle)*11, vy: Math.sin(this.angle)*11, life: 75 });
             shootCooldown = 8;
             sfx('shoot');
@@ -438,6 +481,17 @@ function draw() {
     P.draw();
     drawScanlines();
     if(screenShake>0) ctx.restore();
+
+    // Draw Joysticks
+    ctx.lineWidth = 2;
+    if (leftJoy.active) {
+        ctx.strokeStyle = 'rgba(0,255,102,0.3)'; ctx.beginPath(); ctx.arc(leftJoy.ox, leftJoy.oy, 40, 0, Math.PI*2); ctx.stroke();
+        ctx.fillStyle = 'rgba(0,255,102,0.5)'; ctx.beginPath(); ctx.arc(leftJoy.x, leftJoy.y, 20, 0, Math.PI*2); ctx.fill();
+    }
+    if (rightJoy.active) {
+        ctx.strokeStyle = 'rgba(0,255,102,0.3)'; ctx.beginPath(); ctx.arc(rightJoy.ox, rightJoy.oy, 40, 0, Math.PI*2); ctx.stroke();
+        ctx.fillStyle = 'rgba(0,255,102,0.5)'; ctx.beginPath(); ctx.arc(rightJoy.x, rightJoy.y, 20, 0, Math.PI*2); ctx.fill();
+    }
 
     // Custom cursor crosshair
     ctx.save();
