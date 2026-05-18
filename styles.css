@@ -119,8 +119,9 @@ a {
 .nav-links {
     display: flex;
     list-style: none;
-    gap: 30px;
+    gap: 20px;
     align-items: center;
+    flex-wrap: nowrap;
 }
 
 .nav-links a {
@@ -167,7 +168,8 @@ a {
     color: var(--secondary) !important;
     font-weight: bold;
     text-shadow: 0 0 10px var(--secondary-glow);
-    font-size: 0.9rem !important;
+    font-size: 0.8rem !important;
+    white-space: nowrap;
 }
 
 .hamburger {
