@@ -2,74 +2,754 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Export Logo</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Simply Computerz | Logo & Business Card Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
+        :root {
+            --primary: #00ff66;
+            --primary-glow: rgba(0, 255, 102, 0.4);
+            --secondary: #9d00ff;
+            --secondary-glow: rgba(157, 0, 255, 0.4);
+            --bg-dark: #07070a;
+            --panel-bg: rgba(15, 15, 20, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body { 
-            background: #111; 
+            background: var(--bg-dark); 
             color: #fff; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0;
-            font-family: sans-serif; 
+            justify-content: flex-start; 
+            min-height: 100vh; 
+            padding: 40px 20px;
+            font-family: 'Outfit', sans-serif; 
         }
+
+        /* Top Navigation Tabs */
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.02);
+            padding: 6px;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .mode-tab {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .mode-tab:hover {
+            color: #fff;
+        }
+
+        .mode-tab.active {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(157, 0, 255, 0.3);
+        }
+
+        p.subtitle {
+            color: #a0a0b0;
+            margin-bottom: 35px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        /* Main Workspace Container */
+        .workspace {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        /* Preview Area Frame */
+        .preview-frame {
+            border: 2px dashed rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 14px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+            background: rgba(255,255,255,0.01);
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Logo Preview Element */
         #logo-container {
             display: flex; 
             align-items: center;
-            background: transparent;
-            padding: 50px;
+            justify-content: center;
+            padding: 70px 90px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            width: 950px;
+            height: 320px;
         }
+
+        /* Business Card Element (Standard 3.5" x 2" aspect ratio = 1.75) */
+        #card-container {
+            width: 875px;
+            height: 500px;
+            border-radius: 12px;
+            padding: 40px;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Background themes */
+        .theme-transparent {
+            background: transparent;
+        }
+
+        .theme-grid {
+            background-color: #0c0a12;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 255, 102, 0.22) 0%, transparent 65%),
+                radial-gradient(circle at 85% 50%, rgba(157, 0, 255, 0.15) 0%, transparent 60%),
+                linear-gradient(rgba(0, 255, 102, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 102, 0.025) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            background-position: center center;
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.8);
+        }
+
+        .theme-glow {
+            background: radial-gradient(circle at center, #3d1470 0%, #053a1a 60%, #07070b 100%);
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.7);
+        }
+
+        .theme-matte {
+            background: #0f0f14;
+            box-shadow: inset 0 0 120px rgba(0,0,0,0.95);
+        }
+
+        /* Logo Content Styles */
+        .logo-svg {
+            margin-right: 45px; 
+            filter: drop-shadow(0 0 25px rgba(157,0,255,0.45));
+            flex-shrink: 0;
+        }
+
         .logo-text {
             font-family: 'Share Tech Mono', monospace; 
-            font-size: 150px; 
+            font-size: 100px; 
             font-weight: 700; 
             color: #f4f4f5; 
             letter-spacing: -3px; 
             line-height: 1;
+            white-space: nowrap;
+            user-select: none;
         }
-        .highlight { color: #00ff66; }
-        button { 
-            margin-top: 50px; 
-            padding: 15px 30px; 
-            font-size: 20px; 
-            cursor: pointer; 
-            background: #00ff66; 
-            color: #000; 
-            border: none; 
-            font-weight: bold; 
+
+        /* Business Card Content Styles (Front) */
+        .card-front-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* Business Card Content Styles (Back) */
+        .card-back-content {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 40px;
+        }
+
+        .card-back-left {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-mini-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card-mini-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .card-holder-info {
+            margin-bottom: auto;
+        }
+
+        .card-holder-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .card-holder-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+        }
+
+        .card-contact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .card-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            color: #d0d0e0;
+        }
+
+        .card-contact-icon {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
+            color: var(--primary);
+            text-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .card-back-right {
+            flex: 0.9;
+            border-left: 1px solid rgba(255,255,255,0.06);
+            padding-left: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .card-services-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 8px;
+            padding: 24px;
         }
-        button:hover { background: #00cc55; }
+
+        .card-services-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(157, 0, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(157, 0, 255, 0.2);
+            padding-bottom: 6px;
+        }
+
+        .card-services-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #b0b0c5;
+        }
+
+        .card-services-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-services-list li::before {
+            content: "✓";
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Dual Column Dashboard Settings */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            width: 100%;
+            max-width: 970px;
+        }
+
+        @media (min-width: 850px) {
+            .dashboard {
+                grid-template-columns: 1.2fr 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px 30px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel h3 {
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            color: #a0a0b0;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+        }
+
+        /* Theme Selector Buttons */
+        .theme-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .theme-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #ccc;
+            padding: 10px 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .theme-btn:hover {
+            background: rgba(255,255,255,0.07);
+            color: #fff;
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .theme-btn.active {
+            background: rgba(0, 255, 102, 0.08);
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 12px rgba(0, 255, 102, 0.15);
+        }
+
+        /* Sub Card Tabs (Front/Back) */
+        .card-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .card-tab-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            color: #aaa;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .card-tab-btn.active {
+            background: rgba(157, 0, 255, 0.1);
+            border-color: var(--secondary);
+            color: #fff;
+        }
+
+        /* Input Controls Form */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            color: #8888a0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Download Button */
+        .download-btn {
+            background: linear-gradient(135deg, #00ff66 0%, #00cc55 100%);
+            color: #000;
+            border: none;
+            padding: 16px 20px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px var(--primary-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: inherit;
+            margin-top: auto;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 255, 102, 0.55);
+        }
     </style>
 </head>
 <body>
-    <div id="logo-container">
-        <svg viewBox="0 0 24 24" width="180" height="180" style="margin-right: 40px; filter: drop-shadow(0 0 20px rgba(157,0,255,0.4));">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="#9d00ff" stroke-width="2"/>
-            <path fill="none" stroke="#9d00ff" stroke-width="2" stroke-linecap="round" d="M8 0v3m8-3v3M8 21v3m8-3v3M21 8h3m-3 8h3M0 8h3m-3 8h3"/>
-            <path fill="none" stroke="#9d00ff" stroke-width="1.5" stroke-linecap="round" d="M9 9L6 6m9 3l3-3m-9 9l-3 3m9-3l3 3"/>
-            <rect x="9" y="9" width="6" height="6" fill="none" stroke="#00ff66" stroke-width="2"/>
-            <circle cx="12" cy="12" r="1.5" fill="#00ff66"/>
-        </svg>
-        <div class="logo-text">
-            <span style="color: #9d00ff; text-shadow: 0 0 20px rgba(157,0,255,0.4);">SIMPLY</span><span style="color: #00ff66; text-shadow: 0 0 20px rgba(0,255,102,0.4);">COMPUTERZ</span>
+
+    <h1>Simply Studio</h1>
+    <p class="subtitle">Generate high-resolution transparent or theme-backed logos and business cards</p>
+
+    <!-- Top Mode Selector Tabs -->
+    <div class="mode-selector">
+        <button class="mode-tab active" onclick="setMode('logo')">Logo Exporter</button>
+        <button class="mode-tab" onclick="setMode('card')">Business Card Maker</button>
+    </div>
+
+    <!-- Preview Canvas Area Frame -->
+    <div class="preview-frame">
+        <!-- 1. Logo Workspace -->
+        <div id="logo-container" class="theme-transparent">
+            <svg class="logo-svg" viewBox="0 0 24 24" width="130" height="130">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="#9d00ff" stroke-width="2"/>
+                <path fill="none" stroke="#9d00ff" stroke-width="2" stroke-linecap="round" d="M8 0v3m8-3v3M8 21v3m8-3v3M21 8h3m-3 8h3M0 8h3m-3 8h3"/>
+                <path fill="none" stroke="#9d00ff" stroke-width="1.5" stroke-linecap="round" d="M9 9L6 6m9 3l3-3m-9 9l-3 3m9-3l3 3"/>
+                <rect x="9" y="9" width="6" height="6" fill="none" stroke="#00ff66" stroke-width="2"/>
+                <circle cx="12" cy="12" r="1.5" fill="#00ff66"/>
+            </svg>
+            <div class="logo-text">
+                <span style="color: #9d00ff; text-shadow: 0 0 20px rgba(157,0,255,0.45);">SIMPLY</span><span style="color: #00ff66; text-shadow: 0 0 20px rgba(0,255,102,0.45);">COMPUTERZ</span>
+            </div>
+        </div>
+
+        <!-- 2. Business Card Workspace (scaled with width/height) -->
+        <div id="card-container" class="theme-grid">
+            <!-- Content will be injected dynamically via JS based on Front/Back selection -->
         </div>
     </div>
     
-    <button onclick="downloadLogo()">Download Transparent PNG (For Cards)</button>
+    <!-- Control Panels (Dashboard Grid) -->
+    <div class="workspace">
+        <div class="dashboard">
+            <!-- Panel 1: Theme & Background Style -->
+            <div class="panel">
+                <h3>Design & Theme Options</h3>
+                <div class="theme-selector">
+                    <button class="theme-btn active" id="theme-btn-transparent" onclick="setTheme('transparent')">Transparent Background</button>
+                    <button class="theme-btn" id="theme-btn-grid" onclick="setTheme('grid')">Cyber Grid Background</button>
+                    <button class="theme-btn" id="theme-btn-glow" onclick="setTheme('glow')">Neon Radial Glow</button>
+                    <button class="theme-btn" id="theme-btn-matte" onclick="setTheme('matte')">Sleek Matte Dark</button>
+                </div>
+
+                <div id="card-side-setting" style="display: none; flex-direction: column; gap: 12px; margin-top: 10px;">
+                    <label style="font-size: 0.8rem; color: #8888a0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Business Card Layout</label>
+                    <div class="card-tabs">
+                        <button class="card-tab-btn active" onclick="setCardSide('front')">Card Front (Logo)</button>
+                        <button class="card-tab-btn" onclick="setCardSide('back')">Card Back (Contact Info)</button>
+                    </div>
+                </div>
+
+                <button class="download-btn" onclick="downloadAsset()">Download Print-Ready PNG</button>
+            </div>
+
+            <!-- Panel 2: Interactive Card Info Editor (Only visible in Card Mode) -->
+            <div class="panel" id="card-fields-panel" style="visibility: hidden; opacity: 0; transition: all 0.3s ease;">
+                <h3>Card Contact Details</h3>
+                <div class="form-group">
+                    <label for="input-name">Name</label>
+                    <input type="text" id="input-name" value="Olly K" oninput="updateCardDetails()">
+                </div>
+                <div class="form-group">
+                    <label for="input-title">Job Title</label>
+                    <input type="text" id="input-title" value="Owner & Tech Specialist" oninput="updateCardDetails()">
+                </div>
+                <div class="form-group">
+                    <label for="input-phone">Phone / WhatsApp</label>
+                    <input type="text" id="input-phone" value="07774 661861" oninput="updateCardDetails()">
+                </div>
+                <div class="form-group">
+                    <label for="input-email">Email Address</label>
+                    <input type="text" id="input-email" value="info@simplycomputerz.co.uk" oninput="updateCardDetails()">
+                </div>
+                <div class="form-group">
+                    <label for="input-location">Location</label>
+                    <input type="text" id="input-location" value="Falmouth & Penryn, Cornwall" oninput="updateCardDetails()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Predefined Front/Back HTML Content Cache -->
+    <div id="card-front-template" style="display:none">
+        <div class="card-front-content" style="flex-direction: column; gap: 20px;">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <svg class="logo-svg" viewBox="0 0 24 24" width="130" height="130" style="margin-right: 30px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="#9d00ff" stroke-width="2"/>
+                    <path fill="none" stroke="#9d00ff" stroke-width="2" stroke-linecap="round" d="M8 0v3m8-3v3M8 21v3m8-3v3M21 8h3m-3 8h3M0 8h3m-3 8h3"/>
+                    <path fill="none" stroke="#9d00ff" stroke-width="1.5" stroke-linecap="round" d="M9 9L6 6m9 3l3-3m-9 9l-3 3m9-3l3 3"/>
+                    <rect x="9" y="9" width="6" height="6" fill="none" stroke="#00ff66" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="1.5" fill="#00ff66"/>
+                </svg>
+                <div class="logo-text" style="font-size: 80px;">
+                    <span style="color: #9d00ff; text-shadow: 0 0 20px rgba(157,0,255,0.45);">SIMPLY</span><span style="color: #00ff66; text-shadow: 0 0 20px rgba(0,255,102,0.45);">COMPUTERZ</span>
+                </div>
+            </div>
+            <div style="font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; color: #a0a0b0; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,255,255,0.1); margin-top: 10px;">
+                For all your tech needs
+            </div>
+        </div>
+    </div>
+
+    <div id="card-back-template" style="display:none">
+        <div class="card-back-content">
+            <!-- Left Side Details -->
+            <div class="card-back-left">
+                <!-- Mini Logo Branding -->
+                <div class="card-mini-brand">
+                    <svg viewBox="0 0 24 24" width="40" height="40" style="filter: drop-shadow(0 0 8px rgba(157,0,255,0.4));">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="#9d00ff" stroke-width="2"/>
+                        <path fill="none" stroke="#9d00ff" stroke-width="1.5" stroke-linecap="round" d="M9 9L6 6m9 3l3-3m-9 9l-3 3m9-3l3 3"/>
+                        <rect x="9" y="9" width="6" height="6" fill="none" stroke="#00ff66" stroke-width="2"/>
+                    </svg>
+                    <div class="card-mini-text">
+                        <span style="color: #9d00ff;">SIMPLY</span><span style="color: #00ff66;">COMPUTERZ</span>
+                    </div>
+                </div>
+                <!-- Holder Profile details -->
+                <div class="card-holder-info">
+                    <div class="card-holder-name" id="card-name-out">Olly K</div>
+                    <div class="card-holder-title" id="card-title-out">Owner & Tech Specialist</div>
+                    <div class="card-holder-tagline" style="font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: #8888a0; letter-spacing: 1px; font-style: italic; margin-top: -15px; margin-bottom: 25px;">"For all your tech needs"</div>
+                </div>
+                <!-- Contact info list -->
+                <div class="card-contact-list">
+                    <div class="card-contact-item">
+                        <span class="card-contact-icon">📞</span>
+                        <span id="card-phone-out">07774 661861</span>
+                    </div>
+                    <div class="card-contact-item">
+                        <span class="card-contact-icon">✉️</span>
+                        <span id="card-email-out">info@simplycomputerz.co.uk</span>
+                    </div>
+                    <div class="card-contact-item">
+                        <span class="card-contact-icon">🌐</span>
+                        <span>simplycomputerz.co.uk</span>
+                    </div>
+                    <div class="card-contact-item">
+                        <span class="card-contact-icon">📍</span>
+                        <span id="card-location-out">Falmouth & Penryn, Cornwall</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Side Services List -->
+            <div class="card-back-right">
+                <div class="card-services-panel">
+                    <div class="card-services-title">Core Services</div>
+                    <ul class="card-services-list">
+                        <li>PC Repair & Diagnostics</li>
+                        <li>Custom Gaming & Work PCs</li>
+                        <li>Data Recovery & SSD Upgrades</li>
+                        <li>Wi-Fi Setup & Virus Removal</li>
+                        <li>Web Design & PAT Testing Compliance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        function downloadLogo() {
-            html2canvas(document.querySelector("#logo-container"), {
-                backgroundColor: null, // Transparent background!
-                scale: 3 // Ultra high resolution for printing
-            }).then(canvas => {
+        let currentMode = 'logo'; // 'logo' or 'card'
+        let currentTheme = 'transparent'; // 'transparent', 'grid', 'glow', 'matte'
+        let currentCardSide = 'front'; // 'front' or 'back'
+
+        // Set Active Mode (Logo Generator vs Business Card Maker)
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // Toggle active state in selector tabs
+            document.querySelectorAll('.mode-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Toggle Workspace containers
+            const logoPreview = document.getElementById('logo-container');
+            const cardPreview = document.getElementById('card-container');
+            const cardFields = document.getElementById('card-fields-panel');
+            const cardSideSetting = document.getElementById('card-side-setting');
+
+            if (mode === 'logo') {
+                logoPreview.style.display = 'flex';
+                cardPreview.style.display = 'none';
+                cardFields.style.visibility = 'hidden';
+                cardFields.style.opacity = 0;
+                cardSideSetting.style.display = 'none';
+                
+                // Set default background theme back to transparent
+                setTheme('transparent');
+            } else {
+                logoPreview.style.display = 'none';
+                cardPreview.style.display = 'flex';
+                cardFields.style.visibility = 'visible';
+                cardFields.style.opacity = 1;
+                cardSideSetting.style.display = 'flex';
+
+                // Set default background theme for card to cyber grid
+                setTheme('grid');
+                renderCard();
+            }
+        }
+
+        // Apply Theme Background Styles
+        function setTheme(theme) {
+            currentTheme = theme;
+            
+            // Remove active state on theme buttons
+            document.querySelectorAll('.theme-selector .theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Set active state on target button
+            document.getElementById('theme-btn-' + theme).classList.add('active');
+
+            // Apply theme styling to the active container
+            const container = (currentMode === 'logo') ? document.getElementById('logo-container') : document.getElementById('card-container');
+            container.className = '';
+            container.classList.add('theme-' + theme);
+        }
+
+        // Set Card Side (Front vs Back)
+        function setCardSide(side) {
+            currentCardSide = side;
+
+            // Toggle tab active class
+            document.querySelectorAll('.card-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            renderCard();
+        }
+
+        // Render Business Card Content
+        function renderCard() {
+            const cardContainer = document.getElementById('card-container');
+            if (currentCardSide === 'front') {
+                cardContainer.innerHTML = document.getElementById('card-front-template').innerHTML;
+            } else {
+                cardContainer.innerHTML = document.getElementById('card-back-template').innerHTML;
+                updateCardDetails();
+            }
+        }
+
+        // Sync details from Form Inputs into Card Design in Real-Time
+        function updateCardDetails() {
+            if (currentMode !== 'card' || currentCardSide !== 'back') return;
+
+            const name = document.getElementById('input-name').value;
+            const title = document.getElementById('input-title').value;
+            const phone = document.getElementById('input-phone').value;
+            const email = document.getElementById('input-email').value;
+            const location = document.getElementById('input-location').value;
+
+            // Output elements on the card back
+            const nameOut = document.getElementById('card-name-out');
+            const titleOut = document.getElementById('card-title-out');
+            const phoneOut = document.getElementById('card-phone-out');
+            const emailOut = document.getElementById('card-email-out');
+            const locationOut = document.getElementById('card-location-out');
+
+            if (nameOut) nameOut.textContent = name;
+            if (titleOut) titleOut.textContent = title;
+            if (phoneOut) phoneOut.textContent = phone;
+            if (emailOut) emailOut.textContent = email;
+            if (locationOut) locationOut.textContent = location;
+        }
+
+        // Download High-Resolution Asset
+        function downloadAsset() {
+            const isLogo = currentMode === 'logo';
+            const container = isLogo ? document.querySelector("#logo-container") : document.querySelector("#card-container");
+            const isTransparent = currentTheme === 'transparent';
+            
+            const options = {
+                backgroundColor: isTransparent ? null : undefined, // Transparent bg if selected
+                scale: 3, // High scale (300dpi-equivalent for print cards/banners)
+                useCORS: true,
+                allowTaint: true
+            };
+
+            const filename = isLogo 
+                ? `Simply_Computerz_Logo_${currentTheme.toUpperCase()}.png` 
+                : `Simply_Computerz_Card_${currentCardSide.toUpperCase()}_${currentTheme.toUpperCase()}.png`;
+
+            html2canvas(container, options).then(canvas => {
                 let link = document.createElement('a');
-                link.download = 'Simply_Computerz_Logo_Print.png';
+                link.download = filename;
                 link.href = canvas.toDataURL("image/png");
                 link.click();
             });
