@@ -13,8 +13,15 @@
             overflow: hidden;
             font-family: 'Share Tech Mono', monospace;
             cursor: none;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
-        canvas { display: block; }
+        canvas { 
+            display: block; 
+            touch-action: none;
+        }
 
         #hud {
             position: fixed;

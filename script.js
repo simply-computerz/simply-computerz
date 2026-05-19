@@ -57,137 +57,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Interactive Gaming Orb Logic & Shooting Mechanic
-const orb = document.querySelector('.circuit-orb');
-const gameOverlay = document.querySelector('.game-overlay');
-const scoreBoard = document.getElementById('score-board');
-let score = 0;
-
-if (orb && gameOverlay) {
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
-    let orbX = window.innerWidth / 2;
-    let orbY = window.innerHeight / 2;
-    
-    orb.style.left = '0';
-    orb.style.top = '0';
-
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY; // Using fixed position, so no scrollY needed
-    });
-
-    function animateOrb() {
-        // Faster lerp for gaming feel
-        orbX += (mouseX - orbX) * 0.15;
-        orbY += (mouseY - orbY) * 0.15;
-        
-        orb.style.transform = `translate(calc(-50% + ${orbX}px), calc(-50% + ${orbY}px))`;
-        
-        requestAnimationFrame(animateOrb);
-    }
-    
-    animateOrb();
-
-    // Shooting Mechanic
-    document.addEventListener('click', (e) => {
-        // Firing recoil animation
-        orb.style.transform = `translate(calc(-50% + ${orbX}px), calc(-50% + ${orbY}px)) scale(0.7)`;
-        setTimeout(() => {
-            if(orb) orb.style.transform = `translate(calc(-50% + ${orbX}px), calc(-50% + ${orbY}px)) scale(1)`;
-        }, 100);
-
-        // Check if we clicked a target
-        const target = e.target.closest('.target');
-        if (target) {
-            explodeTarget(target);
-        } else {
-            createLaser(e.clientX, e.clientY);
-        }
-    });
-
-    function createLaser(x, y) {
-        const laser = document.createElement('div');
-        laser.classList.add('laser');
-        laser.style.left = orbX + 'px';
-        laser.style.top = orbY + 'px';
-        
-        const dx = x - orbX;
-        const dy = y - orbY;
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI - 90;
-        const distance = Math.sqrt(dx*dx + dy*dy);
-        
-        laser.style.transform = `rotate(${angle}deg)`;
-        gameOverlay.appendChild(laser);
-        
-        // Animate laser
-        let length = 0;
-        const interval = setInterval(() => {
-            length += 30; // Laser speed
-            laser.style.height = length + 'px';
-            if (length >= distance) {
-                clearInterval(interval);
-                createParticles(x, y);
-                setTimeout(() => laser.remove(), 100);
-            }
-        }, 10);
-    }
-
-    function createParticles(x, y) {
-        for(let i=0; i<8; i++) {
-            const p = document.createElement('div');
-            p.classList.add('particle');
-            p.style.left = x + 'px';
-            p.style.top = y + 'px';
-            gameOverlay.appendChild(p);
-            
-            const angle = Math.random() * Math.PI * 2;
-            const velocity = Math.random() * 5 + 2;
-            let px = x;
-            let py = y;
-            let opacity = 1;
-            
-            const anim = setInterval(() => {
-                px += Math.cos(angle) * velocity;
-                py += Math.sin(angle) * velocity;
-                opacity -= 0.05;
-                p.style.left = px + 'px';
-                p.style.top = py + 'px';
-                p.style.opacity = opacity;
-                if(opacity <= 0) {
-                    clearInterval(anim);
-                    p.remove();
-                }
-            }, 16);
-        }
-    }
-
-    // Spawn targets randomly
-    setInterval(() => {
-        if(document.querySelectorAll('.target').length < 8) {
-            const techEmojis = ['👾', '🐛', '💾', '💻', '🔋'];
-            const randomEmoji = techEmojis[Math.floor(Math.random() * techEmojis.length)];
-            const target = document.createElement('div');
-            target.classList.add('target');
-            target.innerHTML = randomEmoji;
-            target.style.left = Math.random() * (window.innerWidth - 100) + 50 + 'px';
-            target.style.top = Math.random() * (window.innerHeight - 150) + 50 + 'px';
-            gameOverlay.appendChild(target);
-        }
-    }, 1500);
-
-    function explodeTarget(target) {
-        const rect = target.getBoundingClientRect();
-        createParticles(rect.left + rect.width/2, rect.top + rect.height/2);
-        target.remove();
-        
-        score += 10;
-        scoreBoard.innerText = `Score: ${score}`;
-        scoreBoard.style.transform = 'scale(1.2)';
-        setTimeout(() => scoreBoard.style.transform = 'scale(1)', 200);
-    }
-}
-
 // Navbar background change on scroll
 const navbar = document.querySelector('.navbar');
 window.addEventListener('scroll', () => {
@@ -229,3 +98,205 @@ const statObserver = new IntersectionObserver((entries) => {
 
 const statsBar = document.querySelector('.stats-bar');
 if (statsBar) statObserver.observe(statsBar);
+
+// Interactive Ambient Floater Shooting Game
+const floaters = document.querySelectorAll('.ambient-floater');
+const heroSection = document.querySelector('.hero');
+const turret = document.querySelector('.gaming-controller-turret');
+const orb = document.querySelector('.circuit-orb');
+const scoreVal = document.getElementById('score-val');
+let score = 0;
+
+if (heroSection && floaters.length > 0) {
+    // Smooth trailing Circuit Orb logic
+    let mouseX = 0, mouseY = 0;
+    let orbX = 0, orbY = 0;
+    let hasMoved = false;
+
+    // 1. Mouse movements
+    document.addEventListener('mousemove', (e) => {
+        // Show orb on first mouse movement
+        if (!hasMoved && orb) {
+            orb.style.opacity = '1';
+            hasMoved = true;
+        }
+        
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        // Rotate turret towards cursor
+        if (turret) {
+            const turretRect = turret.getBoundingClientRect();
+            const turretX = turretRect.left + turretRect.width / 2;
+            const turretY = turretRect.top + turretRect.height / 2;
+            const dx = e.clientX - turretX;
+            const dy = e.clientY - turretY;
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+            turret.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        }
+    });
+
+    // Lerp/smooth update the circuit orb position
+    function updateOrbPosition() {
+        if (orb && hasMoved) {
+            const dx = mouseX - orbX;
+            const dy = mouseY - orbY;
+            orbX += dx * 0.15;
+            orbY += dy * 0.15;
+            orb.style.left = orbX + 'px';
+            orb.style.top = orbY + 'px';
+        }
+        requestAnimationFrame(updateOrbPosition);
+    }
+    updateOrbPosition();
+
+    // Target hover status for the cursor-following orb
+    floaters.forEach(floater => {
+        floater.addEventListener('mouseenter', () => {
+            if (orb) orb.classList.add('target-hover');
+        });
+        floater.addEventListener('mouseleave', () => {
+            if (orb) orb.classList.remove('target-hover');
+        });
+    });
+
+    // 2. Click to shoot lasers from the controller
+    document.addEventListener('click', (e) => {
+        // Ignore clicks on standard links, inputs, navbars, and buttons to keep them usable
+        if (e.target.closest('a') || e.target.closest('button') || e.target.closest('input') || e.target.closest('textarea') || e.target.closest('.calendly-inline-widget') || e.target.closest('.navbar')) {
+            return;
+        }
+
+        // Fire laser from controller position (bottom-center) to click coordinate
+        const startX = window.innerWidth / 2;
+        const startY = window.innerHeight - 20;
+        createLaser(startX, startY, e.clientX, e.clientY);
+        
+        // Robust Hit Detection: check if click coordinates fall within any floater's bounding box
+        // We use a generous hitbox (+20px padding) since they are text emojis and hard to click precisely
+        let hitFloater = null;
+        for (let i = 0; i < floaters.length; i++) {
+            const floater = floaters[i];
+            if (floater.style.pointerEvents === 'none') continue; // Skip if already exploded/hidden
+            
+            const rect = floater.getBoundingClientRect();
+            const padding = 20; // 20px extra clickable area
+            
+            if (e.clientX >= rect.left - padding && e.clientX <= rect.right + padding &&
+                e.clientY >= rect.top - padding && e.clientY <= rect.bottom + padding) {
+                hitFloater = floater;
+                break;
+            }
+        }
+
+        if (hitFloater) {
+            score++;
+            if (scoreVal) scoreVal.textContent = score;
+            if (orb) orb.classList.remove('target-hover');
+            explodeFloater(hitFloater);
+        }
+    });
+
+    function createLaser(startX, startY, endX, endY) {
+        const laser = document.createElement('div');
+        laser.className = 'hero-laser';
+        document.body.appendChild(laser);
+
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+        // Position laser and rotate it towards click coordinates
+        laser.style.width = length + 'px';
+        laser.style.transform = `translate(${startX}px, ${startY}px) rotate(${angle}deg)`;
+
+        // Visual recoil on controller turret
+        if (turret) {
+            turret.style.transform += ' scale(0.85)';
+            setTimeout(() => {
+                // Return to hover angle
+                const turretRect = turret.getBoundingClientRect();
+                const turretX = turretRect.left + turretRect.width / 2;
+                const turretY = turretRect.top + turretRect.height / 2;
+                const dx = endX - turretX;
+                const dy = endY - turretY;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+                turret.style.transform = `translateX(-50%) rotate(${angle}deg) scale(1)`;
+            }, 80);
+        }
+
+        // Dissolve laser beam
+        setTimeout(() => {
+            laser.style.opacity = '0';
+            setTimeout(() => laser.remove(), 150);
+        }, 80);
+    }
+
+    function explodeFloater(floater) {
+        const rect = floater.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        // Spark particles
+        for (let i = 0; i < 16; i++) {
+            const p = document.createElement('div');
+            p.className = 'laser-particle';
+            p.style.left = x + 'px';
+            p.style.top = y + 'px';
+            
+            // Alternating neon purple and neon green colors
+            const isPurple = Math.random() > 0.5;
+            p.style.background = isPurple ? 'var(--primary)' : 'var(--secondary)';
+            p.style.boxShadow = `0 0 10px ${isPurple ? 'var(--primary-glow)' : 'var(--secondary-glow)'}`;
+            
+            document.body.appendChild(p);
+            
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * 6 + 2;
+            let px = x;
+            let py = y;
+            let opacity = 1;
+            let scale = 1.0;
+            
+            const anim = setInterval(() => {
+                px += Math.cos(angle) * velocity;
+                py += Math.sin(angle) * velocity;
+                opacity -= 0.04;
+                scale -= 0.04;
+                p.style.left = px + 'px';
+                p.style.top = py + 'px';
+                p.style.opacity = opacity;
+                p.style.transform = `scale(${scale})`;
+                
+                if (opacity <= 0) {
+                    clearInterval(anim);
+                    p.remove();
+                }
+            }, 16);
+        }
+
+        // Hide / explode the floater — stop animation so keyframes don't override the scale(0)
+        floater.style.animation = 'none';
+        floater.style.transform = 'scale(0)';
+        floater.style.opacity = '0';
+        floater.style.pointerEvents = 'none';
+
+        // Respawn at a random viewport position after 3.5 seconds
+        // Keep away from navbar (top ~90px = ~11vh) and edges
+        setTimeout(() => {
+            const newTop = Math.random() * 55 + 15;  // 15vh to 70vh (avoids navbar & bottom turret)
+            const newLeft = Math.random() * 70 + 8;  // 8vw to 78vw (avoids edges)
+            floater.style.top = newTop + 'vh';
+            floater.style.left = newLeft + 'vw';
+            floater.style.right = '';
+            floater.style.opacity = '0.45';
+            floater.style.pointerEvents = 'auto';
+            // Pop-in: restore animation and reset transform
+            setTimeout(() => {
+                floater.style.animation = '';
+                floater.style.transform = '';
+            }, 50);
+        }, 3500);
+    }
+}

@@ -43,17 +43,43 @@ canvas.addEventListener('mousedown', () => { mouseDown = true; if (gameState !==
 canvas.addEventListener('mouseup', () => mouseDown = false);
 
 // Touch Listeners
-function handleTouch(e) {
+function handleTouchStart(e) {
     if (e.cancelable) e.preventDefault();
     if (gameState !== 'PLAYING') { startGame(); return; }
     for (let i = 0; i < e.changedTouches.length; i++) {
         const t = e.changedTouches[i];
         if (t.clientX < innerWidth / 2) {
-            if (!leftJoy.active) { leftJoy.active = true; leftJoy.id = t.identifier; leftJoy.ox = t.clientX; leftJoy.oy = t.clientY; }
-            leftJoy.x = t.clientX; leftJoy.y = t.clientY;
+            if (!leftJoy.active) {
+                leftJoy.active = true;
+                leftJoy.id = t.identifier;
+                leftJoy.ox = t.clientX;
+                leftJoy.oy = t.clientY;
+                leftJoy.x = t.clientX;
+                leftJoy.y = t.clientY;
+            }
         } else {
-            if (!rightJoy.active) { rightJoy.active = true; rightJoy.id = t.identifier; rightJoy.ox = t.clientX; rightJoy.oy = t.clientY; }
-            rightJoy.x = t.clientX; rightJoy.y = t.clientY;
+            if (!rightJoy.active) {
+                rightJoy.active = true;
+                rightJoy.id = t.identifier;
+                rightJoy.ox = t.clientX;
+                rightJoy.oy = t.clientY;
+                rightJoy.x = t.clientX;
+                rightJoy.y = t.clientY;
+            }
+        }
+    }
+}
+function handleTouchMove(e) {
+    if (e.cancelable) e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (leftJoy.active && t.identifier === leftJoy.id) {
+            leftJoy.x = t.clientX;
+            leftJoy.y = t.clientY;
+        }
+        if (rightJoy.active && t.identifier === rightJoy.id) {
+            rightJoy.x = t.clientX;
+            rightJoy.y = t.clientY;
         }
     }
 }
@@ -65,8 +91,8 @@ function handleTouchEnd(e) {
         if (rightJoy.id === t.identifier) { rightJoy.active = false; rightJoy.id = null; }
     }
 }
-canvas.addEventListener('touchstart', handleTouch, {passive: false});
-canvas.addEventListener('touchmove', handleTouch, {passive: false});
+canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
 canvas.addEventListener('touchend', handleTouchEnd, {passive: false});
 canvas.addEventListener('touchcancel', handleTouchEnd, {passive: false});
 
